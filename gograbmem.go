@@ -7,15 +7,16 @@ import (
 	"crypto/rand"
 	"flag"
 	"fmt"
-	"io"
+	//"io"
 	"time"
 )
 
 var memsize, step, max int
 var interval, now, then time.Duration
 
-//var myMemory = make([]byte, step)
-var myMemory bytes.Buffer
+var myMemory = make([]byte, step)
+
+//var myMemory bytes.Buffer
 
 func usage() {
 	fmt.Println("a program to suck up memory")
@@ -28,10 +29,11 @@ func init() {
 	flag.Parse()
 }
 
-func fill() {
-	myMemory.Grow(step)
-	bytesWritten, err := io.ReadFull(rand.Reader, myMemory)
-	if bytesWritten != myMemory.len() || err != nil {
+func fill(b bytes.Buffer) {
+	b.Grow(step)
+	slice := b.Bytes()
+	bytesWritten, err := rand.Read(slice)
+	if bytesWritten != len(slice) || err != nil {
 		fmt.Println("error:", err)
 		return
 	}
@@ -40,9 +42,11 @@ func fill() {
 
 func main() {
 	//myMemory = make([]byte, step)
+	myBuffer := bytes.NewBuffer(myMemory)
 	for memsize <= max {
-		myMemory = append(myMemory, [step]byte)
-		fill()
+		//myMemory = append(myMemory, [step]byte)
+		fill(*myBuffer)
+		// the accounting is prolly wrong
 	}
 	usage()
 }
